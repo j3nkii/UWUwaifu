@@ -1,42 +1,61 @@
-require('dotenv').config(); 
+require('dotenv').config();
+// const bigOlUWU = require('./uwuNoise.mp3')
 const { google } = require('googleapis');
-const { Client, Events, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { discordUsers, discordChannels, sandwiches, spreadsheets } = require('./src/discord')
-const cron = require('node-cron');
+const { Client, Collection, Events, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { joinVoiceChannel } = require('@discordjs/voice')
+const { discordUsers, discordChannels, sandwiches, spreadsheets } = require('./src/discord');
+const { cronEvents } = require('./src/cronEvents');
+const fs = require('node:fs');
+const path = require('node:path');
+
 
 const client = new Client({ intents: [
 	GatewayIntentBits.Guilds,
 	GatewayIntentBits.GuildMembers,
 	GatewayIntentBits.GuildMessages,
 	GatewayIntentBits.MessageContent,
-	GatewayIntentBits.GuildScheduledEvents
+	GatewayIntentBits.GuildScheduledEvents,
+	GatewayIntentBits.GuildVoiceStates,
 ]});
+cronEvents(client);
+client.commands = new Collection();
+const commandsPath = path.join(__dirname, './src/commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+console.log('####');
+console.log(commandFiles);
+for(const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
+	client.commands.set(command.data.name, command);
+}
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+	const command = client.commands.get(interaction.commandName);
+	if (!command) return;
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
 
+
+
+
+
+
+
+
+client.once(Events.ClientReady, (c) => {
+	console.log('##################UWU WAIFU IS READY FOR YOU##################');
+	console.log(`Ready! Logged in as ${c.user.tag}`);
+});
 const googleAuth = new google.auth.GoogleAuth({
 	keyFile: 'uwuwaifu-g-sheets.json',
 	scopes: 'https://www.googleapis.com/auth/spreadsheets'
 });
-// const googleClient = googleAuth
-// console.log(googleAuth);
 
-cron.schedule('0 9 * * *', async() => {
-	const channel = await client.channels.fetch(discordChannels.J3NKii_GENERAL);
-	channel.send({
-		content: `Good morning <@${discordUsers.THAT_I_AM}>!`
-	});
-});
-
-cron.schedule('0 */2 * * *', async() => {
-	const channel = await client.channels.fetch(discordChannels.J3NKii_GENERAL);
-	channel.send({
-		content: 'Don\'t forget to drink some water!'
-	});
-});
-
-client.once(Events.ClientReady, (c) => {
-	console.log('##################LOOGGGIN');
-	console.log(`Ready! Logged in as ${c.user.tag}`);
-});
 
 client.on(Events.GuildMemberAdd, async (event) => {
 	console.log(event);
@@ -52,11 +71,9 @@ client.on(Events.GuildScheduledEventCreate, async (event) => {
 			.addComponents(
 				new ButtonBuilder()
 					.setCustomId('primary')
-					.setLabel('Click me!')
+					.setLabel('RSVP')
 					.setStyle(ButtonStyle.Primary)
-					.setURL('https://discord.gg/SYzV42y4?event=1069081998066458624'),
-					// https://discord.gg/SYzV42y4?event=1069082365542006814
-					// https://discord.gg/j6442nWb?event=1069082789015720039
+					.setURL('https://discord.gg/SYzV42y4?event=1069081998066458624')
 			);
 	const { name, description, scheduledStartTimestamp } = event;
 	const date = new Date(scheduledStartTimestamp);
@@ -111,15 +128,15 @@ client.on(Events.MessageCreate, async (message) => {
 			message.reply('yes daddy?');
 			break;
 		case 'test':
-			const channel = await client.guilds.fetch(1068427420941684779);
-			console.log(channel);
-			// const googleClient = await googleAuth.getClient();
-			// const googleSheets = await google.sheets({ version: 'v4', auth: googleClient });
-			// const metaData = await googleSheets.spreadsheets.get({
-			// 	auth: googleAuth,
-			// 	spreadsheetId: spreadsheets.RSVP
-			// });
-			// console.log(metaData);
+			console.log('###test');
+			// const channel = await client.guilds.fetch(1068427420941684779);
+			const connection = joinVoiceChannel({
+				channelId: '1068427770385928193',
+				guildId: message.guild.id,
+				adapterCreator: message.guild.voiceAdapterCreator
+			});
+			// console.log(connection);
+			connection.dispatchAudio('./bigOlUWU.mp3');
 			break;
 		default:
 			break;
@@ -128,4 +145,4 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 //make sure this line is the last line
-client.login(process.env.CLIENT_TOKEN); //login bot using token
+client.login(process.env.CLIENT_TOKEN);
