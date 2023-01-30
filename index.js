@@ -34,6 +34,7 @@ cron.schedule('0 */2 * * *', async() => {
 });
 
 client.once(Events.ClientReady, (c) => {
+	console.log('##################LOOGGGIN');
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
