@@ -104,6 +104,9 @@ client.on(Events.MessageCreate, async (message) => {
 			message.reply(`<@${discordUsers.THAT_I_AM}> is daddy`);
 			break;
 		case 'sandwich':
+			if(message.author.id === '400871447842783252'){
+				message.reply('no');
+			}
 			const sammy = Math.floor(Math.random() * 10)
 			message.reply(`${sandwiches[sammy]}`);
 			break;
