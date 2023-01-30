@@ -139,7 +139,7 @@ client.on(Events.MessageCreate, async (message) => {
 				adapterCreator: message.guild.voiceAdapterCreator
 			});
 			// console.log(connection);
-			connection.dispatchAudio('./bigOlUWU.mp3');
+			// connection.dispatchAudio('./bigOlUWU.mp3');
 			break;
 		default:
 			break;
