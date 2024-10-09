@@ -20,7 +20,7 @@ const cronEvents = async (client) => {
     cron.schedule('*/5 * * * *', async() => {
         const upsResponse = await axios.get('https://us-2.fountain.com/internal_api/portal/ups/applications/272a71c6-e001-4966-9ed4-ddcca0dab4b0/schedule_slots/days?timezone=America%2FChicago');
         const channel = await client.channels.fetch('1293652000327602288');
-        console.log(upsResponse);
+        console.log(upsResponse.data);
         const user = await client.users.fetch(discordUsers.THAT_I_AM);
         if (!user) return message.channel.send("User not found:(");
         if(!upsResponse.data.length){
