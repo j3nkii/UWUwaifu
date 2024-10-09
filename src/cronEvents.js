@@ -3,10 +3,17 @@ const axios = require('axios');
 const { discordChannels, discordUsers } = require('./discord');
 
 const cronEvents = async (client) => {
+    cron.schedule('0 22 * * *', async() => {
+        const channel = await client.channels.fetch(discordChannels.J3NKii_GENERAL);
+        channel.send({
+            content: `Time for bed, <@${discordUsers.THAT_I_AM}>!`
+        });
+    });
+
     cron.schedule('0 9 * * *', async() => {
         const channel = await client.channels.fetch(discordChannels.J3NKii_GENERAL);
         channel.send({
-            content: `Good morning <@${discordUsers.THAT_I_AM}>!`
+            content: `Good morning, <@${discordUsers.THAT_I_AM}>!`
         });
     });
 
