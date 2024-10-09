@@ -15,6 +15,13 @@ const cronEvents = async (client) => {
             content: 'Don\'t forget to drink some water!'
         });
     });
+
+    cron.schedule('*/10 * * * *', async() => {
+        const channel = await client.channels.fetch(discordChannels.J3NKii_NOTIFICATIONS);
+        channel.send({
+            content: 'NEW NOTIFICATION'
+        });
+    });
 }
 
 module.exports = {

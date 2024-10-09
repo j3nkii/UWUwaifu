@@ -1,8 +1,10 @@
 require('dotenv').config();
 // const bigOlUWU = require('./uwuNoise.mp3')
 const { google } = require('googleapis');
+const { join } = require('node:path');
+
 const { Client, Collection, Events, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { joinVoiceChannel } = require('@discordjs/voice')
+const { joinVoiceChannel, createAudioResource, createAudioPlayer, AudioPlayerStatus, NoSubscriberBehavior } = require('@discordjs/voice');
 const { discordUsers, discordChannels, sandwiches, spreadsheets } = require('./src/discord');
 const { cronEvents } = require('./src/cronEvents');
 const fs = require('node:fs');
@@ -95,6 +97,7 @@ client.on(Events.MessageCreate, async (message) => {
 	// ANOTHER BEER
 	const identifier = message.content.replace(/^(\$uwu).*/, '$1');
 	const uwuCommand = message.content.replace(/^\$uwu (.*)/, '$1');
+	console.log(uwuCommand);
 	if(identifier !== '$uwu') return;
 	//universal commands
 	switch (uwuCommand) {
@@ -130,16 +133,36 @@ client.on(Events.MessageCreate, async (message) => {
 		case '$uwu':
 			message.reply('yes daddy?');
 			break;
-		case 'test':
-			console.log('###test');
-			// const channel = await client.guilds.fetch(1068427420941684779);
+		case 'uwu':
+			console.log("$$$$$UUUWUWWUUWU");
+			const player = createAudioPlayer({
+				behaviors: {
+					noSubscriber: NoSubscriberBehavior.Pause,
+				},
+			});
+			let resource = createAudioResource(join(__dirname, './src/commands/uwuNoise.mp3'));
+			await player.play(resource);
+			await message.reply({ content: 'uwu', ephemeral: true });
 			const connection = joinVoiceChannel({
 				channelId: '1068427770385928193',
-				guildId: message.guild.id,
-				adapterCreator: message.guild.voiceAdapterCreator
+				guildId: '1068427420941684779',
+				adapterCreator: message.guild.voiceAdapterCreator,
+				selfDeaf: false,
+				selfMute: false,
 			});
-			// console.log(connection);
-			// connection.dispatchAudio('./bigOlUWU.mp3');
+			await connection.subscribe(player);
+			player.on(AudioPlayerStatus.Idle, () => {
+				player.stop();
+				connection.destroy();
+			});
+			break;
+		case 'test':
+			// console.log('###test');
+			// const connection = joinVoiceChannel({
+			// 	channelId: '1068427770385928193',
+			// 	guildId: message.guild.id,
+			// 	adapterCreator: message.guild.voiceAdapterCreator
+			// });
 			break;
 		default:
 			break;
